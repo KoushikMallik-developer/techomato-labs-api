@@ -1,0 +1,88 @@
+name: techomato-labs-api
+
+# All configuration comes from `.env` (see `.env.example`).
+x-app-env: &app-env
+  env_file: .env
+  environment:
+    # Inside the compose network the services are reached by name; these win
+    # over whatever host-side values `.env` carries for running outside Docker.
+    POSTGRES_HOST: db
+    POSTGRES_PORT: "5432"
+    REDIS_URL: redis://redis:6379
+
+# Both app services build the same image; the second build is a cache hit.
+x-app-build: &app-build
+  image: techomato-labs-api:local
+  build:
+    context: .
+    args:
+      INSTALL_DEV: ${INSTALL_DEV:-true}
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-techomato}
+      POSTGRES_USER: ${POSTGRES_USER:-techomato}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:${DB_HOST_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    ports:
+      - "127.0.0.1:${REDIS_HOST_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  web:
+    <<: [*app-env, *app-build]
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+    volumes:
+      - .:/app
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 40s
+
+  worker:
+    <<: [*app-env, *app-build]
+    restart: unless-stopped
+    command: ["sh", "-c", "celery -A config worker -l $${CELERY_LOG_LEVEL:-info} --concurrency $${CELERY_CONCURRENCY:-2}"]
+    depends_on:
+      web:
+        condition: service_healthy
+    volumes:
+      - .:/app
+
+volumes:
+  pgdata:
+  redisdata:

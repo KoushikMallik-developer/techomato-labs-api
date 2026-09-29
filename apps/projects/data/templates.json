@@ -1,0 +1,753 @@
+{
+ "blank": {
+  "parts": [
+   {
+    "id": "bb-645dbgv",
+    "type": "breadboard",
+    "x": 0,
+    "y": 0,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "ard-645dbgv",
+    "type": "arduino",
+    "x": 30,
+    "y": 250,
+    "rot": 0,
+    "props": {}
+   }
+  ],
+  "wires": [],
+  "code": "void setup() {\n  // put your setup code here, runs once\n}\n\nvoid loop() {\n  // put your main code here, runs repeatedly\n}\n"
+ },
+ "blink": {
+  "parts": [
+   {
+    "id": "bb-84ksrph",
+    "type": "breadboard",
+    "x": 0,
+    "y": 0,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "ard-84ksrph",
+    "type": "arduino",
+    "x": 30,
+    "y": 250,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "l1led-84ksrph",
+    "type": "led",
+    "x": 90,
+    "y": 20,
+    "rot": 0,
+    "props": {
+     "color": "red"
+    }
+   },
+   {
+    "id": "l1res-84ksrph",
+    "type": "resistor",
+    "x": 90,
+    "y": 60,
+    "rot": 0,
+    "props": {
+     "ohms": 220
+    }
+   }
+  ],
+  "wires": [
+   {
+    "id": "w-ccfrwck",
+    "a": "l1led-84ksrph.A",
+    "b": "ard-84ksrph.D13",
+    "color": "#ffd166"
+   },
+   {
+    "id": "w-li7uw14",
+    "a": "l1led-84ksrph.K",
+    "b": "l1res-84ksrph.1",
+    "color": "#4cc9f0"
+   },
+   {
+    "id": "w-cmu6d8u",
+    "a": "l1res-84ksrph.2",
+    "b": "ard-84ksrph.GND1",
+    "color": "#a3adb8"
+   }
+  ],
+  "code": "// The built-in \"L\" LED and the red LED share pin 13.\nvoid setup() {\n  pinMode(LED_BUILTIN, OUTPUT);\n}\n\nvoid loop() {\n  digitalWrite(LED_BUILTIN, HIGH);\n  delay(500);\n  digitalWrite(LED_BUILTIN, LOW);\n  delay(500);\n}\n"
+ },
+ "traffic": {
+  "parts": [
+   {
+    "id": "bb-zrxfjgi",
+    "type": "breadboard",
+    "x": 0,
+    "y": 0,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "ard-zrxfjgi",
+    "type": "arduino",
+    "x": 30,
+    "y": 250,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "r1led-zrxfjgi",
+    "type": "led",
+    "x": 60,
+    "y": 20,
+    "rot": 0,
+    "props": {
+     "color": "red"
+    }
+   },
+   {
+    "id": "r1res-zrxfjgi",
+    "type": "resistor",
+    "x": 60,
+    "y": 60,
+    "rot": 0,
+    "props": {
+     "ohms": 220
+    }
+   },
+   {
+    "id": "y1led-zrxfjgi",
+    "type": "led",
+    "x": 160,
+    "y": 20,
+    "rot": 0,
+    "props": {
+     "color": "yellow"
+    }
+   },
+   {
+    "id": "y1res-zrxfjgi",
+    "type": "resistor",
+    "x": 160,
+    "y": 60,
+    "rot": 0,
+    "props": {
+     "ohms": 220
+    }
+   },
+   {
+    "id": "g1led-zrxfjgi",
+    "type": "led",
+    "x": 260,
+    "y": 20,
+    "rot": 0,
+    "props": {
+     "color": "green"
+    }
+   },
+   {
+    "id": "g1res-zrxfjgi",
+    "type": "resistor",
+    "x": 260,
+    "y": 60,
+    "rot": 0,
+    "props": {
+     "ohms": 220
+    }
+   }
+  ],
+  "wires": [
+   {
+    "id": "w-wmha5k0",
+    "a": "r1led-zrxfjgi.A",
+    "b": "ard-zrxfjgi.D13",
+    "color": "#ffd166"
+   },
+   {
+    "id": "w-wl7ib6u",
+    "a": "r1led-zrxfjgi.K",
+    "b": "r1res-zrxfjgi.1",
+    "color": "#4cc9f0"
+   },
+   {
+    "id": "w-ggl6alu",
+    "a": "r1res-zrxfjgi.2",
+    "b": "ard-zrxfjgi.GND1",
+    "color": "#a3adb8"
+   },
+   {
+    "id": "w-9pvx09w",
+    "a": "y1led-zrxfjgi.A",
+    "b": "ard-zrxfjgi.D12",
+    "color": "#c77dff"
+   },
+   {
+    "id": "w-wupqs0k",
+    "a": "y1led-zrxfjgi.K",
+    "b": "y1res-zrxfjgi.1",
+    "color": "#80ed99"
+   },
+   {
+    "id": "w-afy7pu2",
+    "a": "y1res-zrxfjgi.2",
+    "b": "ard-zrxfjgi.GND1",
+    "color": "#a3adb8"
+   },
+   {
+    "id": "w-vcia2ia",
+    "a": "g1led-zrxfjgi.A",
+    "b": "ard-zrxfjgi.D11",
+    "color": "#ffd166"
+   },
+   {
+    "id": "w-ib5e45t",
+    "a": "g1led-zrxfjgi.K",
+    "b": "g1res-zrxfjgi.1",
+    "color": "#4cc9f0"
+   },
+   {
+    "id": "w-bllbtgd",
+    "a": "g1res-zrxfjgi.2",
+    "b": "ard-zrxfjgi.GND1",
+    "color": "#a3adb8"
+   }
+  ],
+  "code": "const int RED = 13;\nconst int YELLOW = 12;\nconst int GREEN = 11;\n\nvoid setup() {\n  pinMode(RED, OUTPUT);\n  pinMode(YELLOW, OUTPUT);\n  pinMode(GREEN, OUTPUT);\n}\n\nvoid loop() {\n  digitalWrite(GREEN, HIGH);\n  delay(2000);\n  digitalWrite(GREEN, LOW);\n  digitalWrite(YELLOW, HIGH);\n  delay(500);\n  digitalWrite(YELLOW, LOW);\n  digitalWrite(RED, HIGH);\n  delay(2000);\n  digitalWrite(RED, LOW);\n}\n"
+ },
+ "parking": {
+  "parts": [
+   {
+    "id": "bb-5z0bo52",
+    "type": "breadboard",
+    "x": 0,
+    "y": 0,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "ard-5z0bo52",
+    "type": "arduino",
+    "x": 30,
+    "y": 250,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "lcd1-5z0bo52",
+    "type": "lcd",
+    "x": 460,
+    "y": 500,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "us1-5z0bo52",
+    "type": "sonar",
+    "x": 380,
+    "y": 30,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "bz1-5z0bo52",
+    "type": "buzzer",
+    "x": 380,
+    "y": 150,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "r1led-5z0bo52",
+    "type": "led",
+    "x": 60,
+    "y": 20,
+    "rot": 0,
+    "props": {
+     "color": "red"
+    }
+   },
+   {
+    "id": "r1res-5z0bo52",
+    "type": "resistor",
+    "x": 60,
+    "y": 60,
+    "rot": 0,
+    "props": {
+     "ohms": 220
+    }
+   },
+   {
+    "id": "g1led-5z0bo52",
+    "type": "led",
+    "x": 150,
+    "y": 20,
+    "rot": 0,
+    "props": {
+     "color": "green"
+    }
+   },
+   {
+    "id": "g1res-5z0bo52",
+    "type": "resistor",
+    "x": 150,
+    "y": 60,
+    "rot": 0,
+    "props": {
+     "ohms": 220
+    }
+   }
+  ],
+  "wires": [
+   {
+    "id": "w-j4o12iq",
+    "a": "r1led-5z0bo52.A",
+    "b": "ard-5z0bo52.D13",
+    "color": "#ffd166"
+   },
+   {
+    "id": "w-rofisib",
+    "a": "r1led-5z0bo52.K",
+    "b": "r1res-5z0bo52.1",
+    "color": "#4cc9f0"
+   },
+   {
+    "id": "w-ccf7uh0",
+    "a": "r1res-5z0bo52.2",
+    "b": "ard-5z0bo52.GND1",
+    "color": "#a3adb8"
+   },
+   {
+    "id": "w-f7idplo",
+    "a": "g1led-5z0bo52.A",
+    "b": "ard-5z0bo52.D9",
+    "color": "#c77dff"
+   },
+   {
+    "id": "w-vd9pgpv",
+    "a": "g1led-5z0bo52.K",
+    "b": "g1res-5z0bo52.1",
+    "color": "#80ed99"
+   },
+   {
+    "id": "w-3z0usrh",
+    "a": "g1res-5z0bo52.2",
+    "b": "ard-5z0bo52.GND1",
+    "color": "#a3adb8"
+   },
+   {
+    "id": "w-bm388wp",
+    "a": "us1-5z0bo52.VCC",
+    "b": "ard-5z0bo52.5V",
+    "color": "#ff5a4f"
+   },
+   {
+    "id": "w-ft33p57",
+    "a": "us1-5z0bo52.TRIG",
+    "b": "ard-5z0bo52.D7",
+    "color": "#4cc9f0"
+   },
+   {
+    "id": "w-zjremxl",
+    "a": "us1-5z0bo52.ECHO",
+    "b": "ard-5z0bo52.D6",
+    "color": "#ff9f1c"
+   },
+   {
+    "id": "w-nbieyxg",
+    "a": "us1-5z0bo52.GND",
+    "b": "ard-5z0bo52.GND1",
+    "color": "#a3adb8"
+   },
+   {
+    "id": "w-ape2a8r",
+    "a": "bz1-5z0bo52.P",
+    "b": "ard-5z0bo52.D8",
+    "color": "#80ed99"
+   },
+   {
+    "id": "w-s012c7d",
+    "a": "bz1-5z0bo52.N",
+    "b": "ard-5z0bo52.GND2",
+    "color": "#a3adb8"
+   },
+   {
+    "id": "w-hybwcmk",
+    "a": "lcd1-5z0bo52.GND",
+    "b": "ard-5z0bo52.GND1",
+    "color": "#a3adb8"
+   },
+   {
+    "id": "w-juxuhnb",
+    "a": "lcd1-5z0bo52.VCC",
+    "b": "ard-5z0bo52.5V",
+    "color": "#ff5a4f"
+   },
+   {
+    "id": "w-m0oed5q",
+    "a": "lcd1-5z0bo52.SDA",
+    "b": "ard-5z0bo52.A4",
+    "color": "#ff9f1c"
+   },
+   {
+    "id": "w-k1fwh56",
+    "a": "lcd1-5z0bo52.SCL",
+    "b": "ard-5z0bo52.A5",
+    "color": "#c77dff"
+   }
+  ],
+  "code": "#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\n// Drag the HC-SR04 sensor up or down to change the distance.\nLiquidCrystal_I2C lcd(0x27, 16, 2);\nconst int TRIG = 7;\nconst int ECHO = 6;\nconst int RED = 13;\nconst int GREEN = 9;\nconst int BUZZER = 8;\n\nvoid setup() {\n  pinMode(TRIG, OUTPUT);\n  pinMode(ECHO, INPUT);\n  pinMode(RED, OUTPUT);\n  pinMode(GREEN, OUTPUT);\n  lcd.init();\n  lcd.backlight();\n  lcd.setCursor(0, 0);\n  lcd.print(\"Parking sensor\");\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  digitalWrite(TRIG, LOW);\n  delayMicroseconds(2);\n  digitalWrite(TRIG, HIGH);\n  delayMicroseconds(10);\n  digitalWrite(TRIG, LOW);\n\n  long duration = pulseIn(ECHO, HIGH);\n  int cm = duration * 0.034 / 2;\n\n  lcd.setCursor(0, 1);\n  lcd.print(\"Dist: \");\n  lcd.print(cm);\n  lcd.print(\" cm     \");\n  Serial.println(\"distance = \" + String(cm) + \" cm\");\n\n  if (cm < 20) {\n    digitalWrite(RED, HIGH);\n    digitalWrite(GREEN, LOW);\n    tone(BUZZER, 1200, 80);\n  } else {\n    digitalWrite(RED, LOW);\n    digitalWrite(GREEN, HIGH);\n  }\n  delay(200);\n}\n"
+ },
+ "rgbled": {
+  "parts": [
+   {
+    "id": "bb-c2gox7k",
+    "type": "breadboard",
+    "x": 0,
+    "y": 0,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "ard-c2gox7k",
+    "type": "arduino",
+    "x": 30,
+    "y": 250,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "rgb1-c2gox7k",
+    "type": "rgbled",
+    "x": 150,
+    "y": 30,
+    "rot": 0,
+    "props": {}
+   }
+  ],
+  "wires": [
+   {
+    "id": "w-93sywfp",
+    "a": "rgb1-c2gox7k.R",
+    "b": "ard-c2gox7k.D9",
+    "color": "#ffd166"
+   },
+   {
+    "id": "w-3er0mz2",
+    "a": "rgb1-c2gox7k.G",
+    "b": "ard-c2gox7k.D10",
+    "color": "#4cc9f0"
+   },
+   {
+    "id": "w-ofj080h",
+    "a": "rgb1-c2gox7k.B",
+    "b": "ard-c2gox7k.D11",
+    "color": "#ff9f1c"
+   },
+   {
+    "id": "w-uielnmf",
+    "a": "rgb1-c2gox7k.GND",
+    "b": "ard-c2gox7k.GND1",
+    "color": "#a3adb8"
+   }
+  ],
+  "code": "// Cycles the RGB LED through a rainbow using PWM.\nconst int R = 9, G = 10, B = 11;\n\nvoid setColor(int r, int g, int b) {\n  analogWrite(R, r);\n  analogWrite(G, g);\n  analogWrite(B, b);\n}\n\nvoid loop() {\n  setColor(255, 0, 0);\n  delay(500);\n  setColor(0, 255, 0);\n  delay(500);\n  setColor(0, 0, 255);\n  delay(500);\n  setColor(255, 255, 0);\n  delay(500);\n}\n\nvoid setup() {\n  pinMode(R, OUTPUT);\n  pinMode(G, OUTPUT);\n  pinMode(B, OUTPUT);\n}\n"
+ },
+ "servoseg": {
+  "parts": [
+   {
+    "id": "bb-yfbm0yb",
+    "type": "breadboard",
+    "x": 0,
+    "y": 0,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "ard-yfbm0yb",
+    "type": "arduino",
+    "x": 30,
+    "y": 250,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "sv1-yfbm0yb",
+    "type": "servo",
+    "x": 380,
+    "y": 40,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "seg1-yfbm0yb",
+    "type": "sevenseg",
+    "x": 200,
+    "y": 40,
+    "rot": 0,
+    "props": {}
+   }
+  ],
+  "wires": [
+   {
+    "id": "w-wehuwsr",
+    "a": "sv1-yfbm0yb.S",
+    "b": "ard-yfbm0yb.D9",
+    "color": "#ffd166"
+   },
+   {
+    "id": "w-ifkwadk",
+    "a": "sv1-yfbm0yb.VCC",
+    "b": "ard-yfbm0yb.5V",
+    "color": "#ff5a4f"
+   },
+   {
+    "id": "w-a3vzqej",
+    "a": "sv1-yfbm0yb.GND",
+    "b": "ard-yfbm0yb.GND1",
+    "color": "#a3adb8"
+   },
+   {
+    "id": "w-humfa9y",
+    "a": "seg1-yfbm0yb.COM",
+    "b": "ard-yfbm0yb.GND2",
+    "color": "#a3adb8"
+   },
+   {
+    "id": "w-kbb2wlt",
+    "a": "seg1-yfbm0yb.a",
+    "b": "ard-yfbm0yb.D2",
+    "color": "#80ed99"
+   },
+   {
+    "id": "w-65gxa73",
+    "a": "seg1-yfbm0yb.b",
+    "b": "ard-yfbm0yb.D3",
+    "color": "#f15bb5"
+   },
+   {
+    "id": "w-prw8522",
+    "a": "seg1-yfbm0yb.c",
+    "b": "ard-yfbm0yb.D4",
+    "color": "#ffd166"
+   },
+   {
+    "id": "w-blarxtu",
+    "a": "seg1-yfbm0yb.d",
+    "b": "ard-yfbm0yb.D5",
+    "color": "#4cc9f0"
+   },
+   {
+    "id": "w-out48g0",
+    "a": "seg1-yfbm0yb.e",
+    "b": "ard-yfbm0yb.D6",
+    "color": "#ff9f1c"
+   },
+   {
+    "id": "w-4ar8t52",
+    "a": "seg1-yfbm0yb.f",
+    "b": "ard-yfbm0yb.D7",
+    "color": "#c77dff"
+   },
+   {
+    "id": "w-kxu7jxy",
+    "a": "seg1-yfbm0yb.g",
+    "b": "ard-yfbm0yb.D8",
+    "color": "#80ed99"
+   }
+  ],
+  "code": "#include <Servo.h>\nServo arm;\nconst int segPins[] = {2, 3, 4, 5, 6, 7, 8}; // a b c d e f g\nconst bool digits[10][7] = {\n  {1,1,1,1,1,1,0}, {0,1,1,0,0,0,0}, {1,1,0,1,1,0,1}, {1,1,1,1,0,0,1}, {0,1,1,0,0,1,1},\n  {1,0,1,1,0,1,1}, {1,0,1,1,1,1,1}, {1,1,1,0,0,0,0}, {1,1,1,1,1,1,1}, {1,1,1,1,0,1,1}\n};\n\nvoid showDigit(int d) {\n  for (int i = 0; i < 7; i++) digitalWrite(segPins[i], digits[d][i] ? HIGH : LOW);\n}\n\nvoid setup() {\n  for (int i = 0; i < 7; i++) pinMode(segPins[i], OUTPUT);\n  arm.attach(9);\n}\n\nvoid loop() {\n  for (int d = 0; d < 10; d++) {\n    showDigit(d);\n    arm.write(d * 18);\n    delay(400);\n  }\n}\n"
+ },
+ "relaymotor": {
+  "parts": [
+   {
+    "id": "bb-3x35oe3",
+    "type": "breadboard",
+    "x": 0,
+    "y": 0,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "ard-3x35oe3",
+    "type": "arduino",
+    "x": 30,
+    "y": 250,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "rl1-3x35oe3",
+    "type": "relay",
+    "x": 220,
+    "y": 40,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "mo1-3x35oe3",
+    "type": "motor",
+    "x": 340,
+    "y": 40,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "bt1-3x35oe3",
+    "type": "button",
+    "x": 120,
+    "y": 40,
+    "rot": 0,
+    "props": {}
+   }
+  ],
+  "wires": [
+   {
+    "id": "w-4dk0fvd",
+    "a": "bt1-3x35oe3.1",
+    "b": "ard-3x35oe3.D2",
+    "color": "#ffd166"
+   },
+   {
+    "id": "w-muk9akf",
+    "a": "bt1-3x35oe3.2",
+    "b": "ard-3x35oe3.GND1",
+    "color": "#a3adb8"
+   },
+   {
+    "id": "w-jkmpf5t",
+    "a": "rl1-3x35oe3.IN",
+    "b": "ard-3x35oe3.D8",
+    "color": "#ff9f1c"
+   },
+   {
+    "id": "w-ie3tr4p",
+    "a": "rl1-3x35oe3.GND",
+    "b": "ard-3x35oe3.GND2",
+    "color": "#a3adb8"
+   },
+   {
+    "id": "w-s9a1jb6",
+    "a": "rl1-3x35oe3.COM",
+    "b": "ard-3x35oe3.5V",
+    "color": "#ff5a4f"
+   },
+   {
+    "id": "w-1vsqcw7",
+    "a": "rl1-3x35oe3.NO",
+    "b": "mo1-3x35oe3.+",
+    "color": "#f15bb5"
+   },
+   {
+    "id": "w-ij9v10l",
+    "a": "mo1-3x35oe3.-",
+    "b": "ard-3x35oe3.GND1",
+    "color": "#a3adb8"
+   }
+  ],
+  "code": "// Press the button to toggle the relay, which switches the motor.\nconst int BUTTON = 2;\nconst int RELAY = 8;\nbool motorOn = false;\nbool lastBtn = false;\n\nvoid setup() {\n  pinMode(BUTTON, INPUT_PULLUP);\n  pinMode(RELAY, OUTPUT);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  bool btn = digitalRead(BUTTON) == LOW;\n  if (btn && !lastBtn) {\n    motorOn = !motorOn;\n    digitalWrite(RELAY, motorOn ? HIGH : LOW);\n    Serial.println(motorOn ? \"Motor ON\" : \"Motor OFF\");\n  }\n  lastBtn = btn;\n  delay(30);\n}\n"
+ },
+ "sensors": {
+  "parts": [
+   {
+    "id": "bb-if05nr4",
+    "type": "breadboard",
+    "x": 0,
+    "y": 0,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "ard-if05nr4",
+    "type": "arduino",
+    "x": 30,
+    "y": 250,
+    "rot": 0,
+    "props": {}
+   },
+   {
+    "id": "pot1-if05nr4",
+    "type": "pot",
+    "x": 120,
+    "y": 480,
+    "rot": 0,
+    "props": {
+     "pos": 0.5
+    }
+   },
+   {
+    "id": "ldr1-if05nr4",
+    "type": "ldr",
+    "x": 220,
+    "y": 480,
+    "rot": 0,
+    "props": {
+     "light": 70
+    }
+   },
+   {
+    "id": "pir1-if05nr4",
+    "type": "pir",
+    "x": 320,
+    "y": 40,
+    "rot": 0,
+    "props": {}
+   }
+  ],
+  "wires": [
+   {
+    "id": "w-rpyuw07",
+    "a": "pot1-if05nr4.A",
+    "b": "ard-if05nr4.5V",
+    "color": "#ff5a4f"
+   },
+   {
+    "id": "w-iiv14hf",
+    "a": "pot1-if05nr4.W",
+    "b": "ard-if05nr4.A0",
+    "color": "#4cc9f0"
+   },
+   {
+    "id": "w-yg392tq",
+    "a": "pot1-if05nr4.B",
+    "b": "ard-if05nr4.GND1",
+    "color": "#a3adb8"
+   },
+   {
+    "id": "w-ni4blyo",
+    "a": "ldr1-if05nr4.A",
+    "b": "ard-if05nr4.5V",
+    "color": "#ff5a4f"
+   },
+   {
+    "id": "w-z2ap9ol",
+    "a": "ldr1-if05nr4.B",
+    "b": "ard-if05nr4.A1",
+    "color": "#80ed99"
+   },
+   {
+    "id": "w-g5mu85e",
+    "a": "pir1-if05nr4.VCC",
+    "b": "ard-if05nr4.5V",
+    "color": "#ff5a4f"
+   },
+   {
+    "id": "w-1vxtewu",
+    "a": "pir1-if05nr4.OUT",
+    "b": "ard-if05nr4.D2",
+    "color": "#ffd166"
+   },
+   {
+    "id": "w-1pu6vqo",
+    "a": "pir1-if05nr4.GND",
+    "b": "ard-if05nr4.GND2",
+    "color": "#a3adb8"
+   }
+  ],
+  "code": "// Reads a knob, a light sensor, and a motion sensor.\nconst int PIR = 2;\n\nvoid setup() {\n  pinMode(PIR, INPUT);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  int knob = analogRead(A0);\n  int light = analogRead(A1);\n  int motion = digitalRead(PIR);\n  Serial.println(\"knob=\" + String(knob) + \" light=\" + String(light) + \" motion=\" + String(motion));\n  delay(300);\n}\n"
+ }
+}
