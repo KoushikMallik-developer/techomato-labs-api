@@ -1,0 +1,113 @@
+# Production stack:  docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+# Add `--profile proxy` to also run Caddy (automatic HTTPS) in front of the API.
+name: techomato-labs-api-prod
+
+x-app: &app
+  image: techomato-labs-api:prod
+  build:
+    context: .
+    args:
+      INSTALL_DEV: "false"
+  env_file: .env.production
+  environment:
+    POSTGRES_HOST: db
+    POSTGRES_PORT: "5432"
+    REDIS_URL: redis://:${REDIS_PASSWORD:?set REDIS_PASSWORD in .env.production}@redis:6379
+    DJANGO_DEBUG: "false"
+    GUNICORN_RELOAD: "false"
+  restart: always
+  init: true
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    init: true
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-techomato}
+      POSTGRES_USER: ${POSTGRES_USER:-techomato}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env.production}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    init: true
+    command: ["sh", "-c", "exec redis-server --appendonly yes --requirepass \"$$REDIS_PASSWORD\""]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?set REDIS_PASSWORD in .env.production}
+      REDISCLI_AUTH: ${REDIS_PASSWORD}
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  web:
+    <<: *app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # Bound to localhost by default: put your own proxy in front, or use the
+    # `proxy` profile below. Set WEB_BIND=0.0.0.0 only if you know why.
+    ports:
+      - "${WEB_BIND:-127.0.0.1}:${WEB_PORT:-8000}:8000"
+    volumes:
+      - static:/var/app/static
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import os, urllib.request; host = os.environ['DJANGO_ALLOWED_HOSTS'].split(',')[0].strip(); urllib.request.urlopen(urllib.request.Request('http://localhost:8000/api/v1/health/', headers={'Host': host}), timeout=3)"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  worker:
+    <<: *app
+    command: ["sh", "-c", "exec celery -A config worker -l $${CELERY_LOG_LEVEL:-info} --concurrency $${CELERY_CONCURRENCY:-2} --max-tasks-per-child 500"]
+    depends_on:
+      web:
+        condition: service_healthy
+
+  caddy:
+    image: caddy:2-alpine
+    profiles: ["proxy"]
+    restart: always
+    init: true
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?set API_DOMAIN in .env.production}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env.production}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  redisdata:
+  static:
+  caddy_data:
+  caddy_config:

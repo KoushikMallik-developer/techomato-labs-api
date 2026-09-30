@@ -1,8 +1,9 @@
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
-    path('django-admin/', admin.site.urls),
+    path(settings.DJANGO_ADMIN_URL, admin.site.urls),
     path(
         'api/v1/',
         include(
@@ -16,3 +17,6 @@ urlpatterns = [
         ),
     ),
 ]
+
+handler404 = 'apps.core.views.not_found'
+handler500 = 'apps.core.views.server_error'

@@ -1,0 +1,10 @@
+# Lint config used by CI (`ruff check .`). Formatting is not enforced.
+line-length = 130
+target-version = "py312"
+extend-exclude = ["**/migrations/*"]
+
+[lint]
+# pyflakes (unused imports/variables, undefined names), pycodestyle errors, bugbear (likely bugs)
+select = ["E4", "E7", "E9", "F", "B"]
+# `assert False`-style tests and DRF's class-attribute serializers trip these; they're intentional here.
+ignore = ["B017", "B018", "B904"]

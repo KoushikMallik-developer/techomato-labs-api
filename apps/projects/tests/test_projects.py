@@ -1,7 +1,9 @@
 import json
 import uuid
+from datetime import timedelta
 
 import pytest
+from django.utils import timezone
 
 from apps.projects.models import Folder, Project
 from apps.projects.templates import build_template, template_keys
@@ -97,6 +99,9 @@ class TestProjectCrud:
         old = Project.objects.create(owner=user, name='old')
         Project.objects.create(owner=other_user, name='theirs')
         new = Project.objects.create(owner=user, name='new')
+        # explicit timestamps: coarse clocks (Windows) can tie back-to-back creates
+        Project.objects.filter(pk=old.pk).update(updated_at=timezone.now() - timedelta(hours=1))
+        Project.objects.filter(pk=new.pk).update(updated_at=timezone.now())
         names = [p['name'] for p in auth_client.get(LIST).json()]
         assert names == ['new', 'old']
         assert {old.name, new.name} == set(names)

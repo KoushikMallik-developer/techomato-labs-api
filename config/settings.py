@@ -6,6 +6,7 @@ variables (see `.env.example`), so the same image runs in dev and prod.
 """
 import os
 from pathlib import Path
+from urllib.parse import parse_qs, unquote, urlsplit
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -55,7 +56,14 @@ if not SECRET_KEY:
         raise ImproperlyConfigured('DJANGO_SECRET_KEY must be set when DJANGO_DEBUG is off.')
     SECRET_KEY = 'insecure-dev-only-key-do-not-use-in-production'
 
+# URL prefix of Django's built-in admin (data browser). Use something unguessable in production.
+DJANGO_ADMIN_URL = (env('DJANGO_ADMIN_URL', 'django-admin').strip('/') or 'django-admin') + '/'
+
 ALLOWED_HOSTS = env_list('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1')
+# Render exposes the service's public *.onrender.com hostname through this variable.
+_render_host = env('RENDER_EXTERNAL_HOSTNAME')
+if _render_host and _render_host not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(_render_host)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -74,6 +82,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'apps.core.middleware.HealthCheckMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -104,6 +113,9 @@ TEMPLATES = [
     },
 ]
 
+# Superseded by our own deploy check techomato.E002 (minimum length + character variety).
+SILENCED_SYSTEM_CHECKS = ['security.W009']
+
 AUTH_USER_MODEL = 'accounts.User'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -117,9 +129,35 @@ USE_TZ = True
 # --------------------------------------------------------------------------
 # database (PostgreSQL)
 # --------------------------------------------------------------------------
+def database_from_url(url):
+    """Parse postgres://user:pass@host:port/dbname?sslmode=require into a Django DATABASES entry."""
+    parts = urlsplit(url)
+    if parts.scheme not in ('postgres', 'postgresql'):
+        raise ImproperlyConfigured('DATABASE_URL must start with postgres:// or postgresql://')
+    if not parts.hostname or not parts.path.strip('/'):
+        raise ImproperlyConfigured('DATABASE_URL needs a host and a database name.')
+    config = {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': unquote(parts.path.lstrip('/')),
+        'USER': unquote(parts.username or ''),
+        'PASSWORD': unquote(parts.password or ''),
+        'HOST': parts.hostname,
+        'PORT': str(parts.port or 5432),
+        'CONN_MAX_AGE': env_int('DB_CONN_MAX_AGE', 60),
+        'CONN_HEALTH_CHECKS': True,
+    }
+    sslmode = parse_qs(parts.query).get('sslmode', [''])[0]
+    if sslmode:
+        config['OPTIONS'] = {'sslmode': sslmode}
+    return config
+
+
+# DATABASE_URL (Render and most PaaS) wins over the individual POSTGRES_* variables.
 # `sqlite` exists only so the unit tests can run without a Postgres server.
 DATABASE_ENGINE = env('DATABASE_ENGINE', 'postgresql').lower()
-if DATABASE_ENGINE == 'sqlite':
+if env('DATABASE_URL'):
+    DATABASES = {'default': database_from_url(env('DATABASE_URL'))}
+elif DATABASE_ENGINE == 'sqlite':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -146,6 +184,8 @@ else:
 # --------------------------------------------------------------------------
 # Redis: cache, sessions, Celery broker (separate logical databases)
 # --------------------------------------------------------------------------
+# Cache, sessions and the Celery broker use different key prefixes/names, so they can
+# share one logical database (set every *_DB to 0) on hosts without multi-DB Redis.
 REDIS_URL = env('REDIS_URL', 'redis://localhost:6379').rstrip('/')
 REDIS_CACHE_DB = env_int('REDIS_CACHE_DB', 0)
 REDIS_SESSION_DB = env_int('REDIS_SESSION_DB', 1)
@@ -192,6 +232,8 @@ if env_bool('USE_X_FORWARDED_PROTO', False):
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = env_bool('SECURE_SSL_REDIRECT', False)
 SECURE_HSTS_SECONDS = env_int('SECURE_HSTS_SECONDS', 0)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool('SECURE_HSTS_INCLUDE_SUBDOMAINS', False)
+SECURE_HSTS_PRELOAD = env_bool('SECURE_HSTS_PRELOAD', False)
 
 
 # --------------------------------------------------------------------------
@@ -217,7 +259,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ['apps.core.authentication.ApiSessionAuthentication'],
     'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated'],
     'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
-    'DEFAULT_PARSER_CLASSES': ['rest_framework.parsers.JSONParser'],
+    'DEFAULT_PARSER_CLASSES': ['apps.core.parsers.SafeJSONParser'],
     'EXCEPTION_HANDLER': 'apps.core.exceptions.api_exception_handler',
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',

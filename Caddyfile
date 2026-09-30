@@ -1,0 +1,13 @@
+# Optional TLS reverse proxy (docker compose --profile proxy). Caddy obtains and
+# renews Let's Encrypt certificates automatically for API_DOMAIN.
+{
+	email {$ACME_EMAIL}
+}
+
+{$API_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy web:8000
+	header {
+		-Server
+	}
+}

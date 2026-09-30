@@ -1,0 +1,168 @@
+# Render Blueprint for the Techomato Labs API.
+#   Dashboard -> New -> Blueprint -> pick this repo. Render will prompt for every
+#   `sync: false` value below. See README ("Deploying on Render") for the full checklist.
+#
+# Topology (all in one region so the private network works):
+#   techomato-api      web service (Docker)   - gunicorn, HTTPS + custom domain
+#   techomato-worker   background worker      - Celery (verification / reset emails)
+#   techomato-db       managed PostgreSQL 16
+#   techomato-redis    Key Value (Redis-compatible): cache + sessions + Celery broker
+#
+# Plans below are paid instances (background workers cannot be free, free Postgres
+# expires after 30 days, free Key Value does not persist sessions). Adjust to taste.
+
+envVarGroups:
+  # Non-secret settings shared by the web service and the worker. Edit the URLs to match your domains.
+  - name: techomato-shared
+    envVars:
+      - key: DJANGO_DEBUG
+        value: "false"
+      # 256-bit random value generated once by Render; shared so web and worker sign/verify tokens identically.
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: LOG_LEVEL
+        value: INFO
+
+      # --- domains: the SPA and the API ---
+      - key: FRONTEND_URL
+        value: https://techomato.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://techomato.com
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://techomato.com
+      # The *.onrender.com hostname is added automatically (RENDER_EXTERNAL_HOSTNAME).
+      - key: DJANGO_ALLOWED_HOSTS
+        value: api.techomato.com
+
+      # --- cookies / TLS (Render terminates HTTPS and sets X-Forwarded-Proto) ---
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: CSRF_COOKIE_SECURE
+        value: "true"
+      # techomato.com + api.techomato.com are the same site, so Lax works. If the SPA lives on another
+      # registrable domain (e.g. *.vercel.app) use None for both: browsers then require Secure cookies.
+      - key: SESSION_COOKIE_SAMESITE
+        value: Lax
+      - key: CSRF_COOKIE_SAMESITE
+        value: Lax
+      - key: USE_X_FORWARDED_PROTO
+        value: "true"
+      - key: SECURE_HSTS_SECONDS
+        value: "31536000"
+      # Verify after the first deploy (see README): GET /api/v1/health/?debug=ip must report your own IP as `ident`.
+      - key: THROTTLE_NUM_PROXIES
+        value: "1"
+
+      # --- Key Value has no documented multi-database support: keep everything in DB 0 ---
+      - key: REDIS_CACHE_DB
+        value: "0"
+      - key: REDIS_SESSION_DB
+        value: "0"
+      - key: REDIS_BROKER_DB
+        value: "0"
+      - key: REDIS_RESULT_DB
+        value: "0"
+
+      # --- email (Brevo SMTP; credentials are set on the worker only) ---
+      - key: EMAIL_BACKEND
+        value: django.core.mail.backends.smtp.EmailBackend
+      - key: EMAIL_HOST
+        value: smtp-relay.brevo.com
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USE_TLS
+        value: "true"
+      - key: DEFAULT_FROM_EMAIL
+        value: Techomato Labs <no-reply@techomato.com>
+
+databases:
+  - name: techomato-db
+    databaseName: techomato
+    user: techomato
+    region: singapore
+    plan: 0.1c-256mb
+    postgresMajorVersion: "16"
+    # No public access: only services on Render's private network can connect.
+    ipAllowList: []
+
+services:
+  - type: keyvalue
+    name: techomato-redis
+    region: singapore
+    plan: 256mb
+    # Sessions and queued jobs live here: never evict them to make room.
+    maxmemoryPolicy: noeviction
+    # Internal connections only.
+    ipAllowList: []
+
+  - type: web
+    name: techomato-api
+    runtime: docker
+    region: singapore
+    plan: 0.5c-512mb
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/v1/health/
+    # Migrations, admin bootstrap and gallery seeds run once per deploy, before the new instance starts.
+    preDeployCommand: sh scripts/predeploy.sh
+    domains:
+      - api.techomato.com
+    envVars:
+      - fromGroup: techomato-shared
+      - key: DATABASE_URL
+        fromDatabase:
+          name: techomato-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: techomato-redis
+          property: connectionString
+      # start-web.sh skips release tasks: preDeployCommand already did them.
+      - key: RUN_RELEASE_TASKS
+        value: "false"
+      - key: GUNICORN_WORKERS
+        value: "2"
+      # --- secrets you provide at first sync ---
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_NAME
+        value: Techomato Admin
+      # Unguessable path for Django's admin, e.g. ops-7f3k9x (no slashes).
+      - key: DJANGO_ADMIN_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+
+  - type: worker
+    name: techomato-worker
+    runtime: docker
+    region: singapore
+    plan: 0.5c-512mb
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: celery -A config worker -l info --concurrency 2 --max-tasks-per-child 500
+    envVars:
+      - fromGroup: techomato-shared
+      - key: DATABASE_URL
+        fromDatabase:
+          name: techomato-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: techomato-redis
+          property: connectionString
+      # --- Brevo SMTP credentials (Brevo -> SMTP & API -> SMTP) ---
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false

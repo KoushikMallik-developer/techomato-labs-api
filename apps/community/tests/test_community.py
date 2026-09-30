@@ -326,3 +326,12 @@ def test_old_projects_do_not_leak_into_gallery_after_owner_unpublishes(client, u
     project = make_public(user)
     Project.objects.filter(pk=project.pk).update(published=False, approved=False, published_at=timezone.now() - timedelta(days=1))
     assert client.get(GALLERY).json() == []
+
+
+@pytest.mark.parametrize('param', ['q', 'tag', 'author'])
+def test_nul_characters_in_query_params_do_not_crash(client, user, param):
+    make_public(user, 'visible')
+    response = client.get(GALLERY, {param: 'x' + chr(0)})
+    assert response.status_code == 200
+    # the NUL is dropped, leaving a normal (here: non-matching) filter
+    assert client.get(GALLERY, {param: chr(0)}).status_code == 200

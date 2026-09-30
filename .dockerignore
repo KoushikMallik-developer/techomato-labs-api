@@ -11,3 +11,4 @@ __pycache__
 staticfiles
 .pytest_cache
 README.md
+.env*

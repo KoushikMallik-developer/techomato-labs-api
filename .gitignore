@@ -219,3 +219,11 @@ __marimo__/
 
 # Collected static files (Django admin)
 staticfiles/
+
+# Environment files: keep only the *.example templates
+.env.*
+!.env.example
+!.env.production.example
+
+# JetBrains IDE
+.idea/

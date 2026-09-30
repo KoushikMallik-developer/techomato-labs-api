@@ -1,4 +1,8 @@
 """Uniform error bodies: {"detail": "<message>", "code": "<slug>", "errors": {...}}."""
+import math
+
+from django.core.exceptions import PermissionDenied
+from django.http import Http404
 from rest_framework import exceptions
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
@@ -21,6 +25,15 @@ def _first_message(data):
     return None
 
 
+def _code_for(exc):
+    # DRF converts these Django exceptions to API errors but hands us the original.
+    if isinstance(exc, Http404):
+        return 'not_found'
+    if isinstance(exc, PermissionDenied):
+        return 'permission_denied'
+    return getattr(exc, 'default_code', 'error')
+
+
 def api_exception_handler(exc, context):
     response = exception_handler(exc, context)
     if response is None:
@@ -35,9 +48,10 @@ def api_exception_handler(exc, context):
         return response
 
     if isinstance(response.data, dict) and 'detail' in response.data:
-        response.data = {'detail': str(response.data['detail']), 'code': getattr(exc, 'default_code', 'error')}
+        response.data = {'detail': str(response.data['detail']), 'code': _code_for(exc)}
         if isinstance(exc, exceptions.Throttled) and exc.wait is not None:
-            response.data['retryAfter'] = int(exc.wait)
+            # Round up: retrying at the truncated value would still be throttled.
+            response.data['retryAfter'] = math.ceil(exc.wait)
     return response
 
 

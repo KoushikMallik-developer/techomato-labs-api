@@ -52,11 +52,15 @@ class GalleryListView(ListAPIView):
         user = self.request.user
         qs = gallery_queryset(user)
 
-        q = params.get('q', '').strip()
+        def param(name):
+            # PostgreSQL cannot compare against NUL characters (would be a 500).
+            return params.get(name, '').replace('\x00', '').strip()
+
+        q = param('q')
         if q:
             qs = qs.filter(Q(name__icontains=q) | Q(description__icontains=q) | Q(tags__icontains=q))
 
-        tag = params.get('tag', '').strip()
+        tag = param('tag')
         if tag == FOLLOWING_FILTER:
             handles = list(Follow.objects.filter(follower=user).values_list('handle', flat=True)) if user.is_authenticated else []
             qs = qs.filter(Q(owner__handle__in=handles) | Q(author_name__in=handles))
@@ -65,7 +69,7 @@ class GalleryListView(ListAPIView):
             # match is an exact element match.
             qs = qs.filter(tags__icontains=f'"{tag.lower()}"')
 
-        author = params.get('author', '').strip()
+        author = param('author')
         if author:
             qs = qs.filter(Q(owner__handle=author) | Q(author_name=author))
 
